@@ -69,13 +69,28 @@ async def convert_video_to_mp3(update: Update, context: ContextTypes.DEFAULT_TYP
                 except Exception: pass
 
 def main():
+    # 1. Build the application layout
     application = Application.builder().token(BOT_TOKEN).build()
+    
+    # 2. Register your command handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, convert_video_to_mp3))
     
+    # 3. Get the port assigned dynamically by Render
     port = int(os.environ.get("PORT", 8080))
+    
     logger.info("Starting converter webhook gateway...")
     
+    # 4. Force Telegram to delete any old broken webhooks automatically on startup
+    async def reset_webhook():
+        await application.bot.delete_webhook(drop_pending_updates=True)
+        logger.info("Old webhooks cleared successfully!")
+    
+    # Run the setup loop securely
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(reset_webhook())
+    
+    # 5. Let the python framework register and run the webhook itself!
     application.run_webhook(
         listen="0.0.0.0",
         port=port,
@@ -85,4 +100,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
