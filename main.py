@@ -5,8 +5,7 @@ import logging
 import asyncio
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from moviepy.editor import VideoFileClip
-
+from moviepy.video.io.VideoFileClip import VideoFileClip
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ async def convert_video_to_mp3(update: Update, context: ContextTypes.DEFAULT_TYP
         
         loop = asyncio.get_running_loop()
         def process_audio():
-            video = VideoFileClip(input_path)
+            video = VideoFileClip(input_path, audio=True)
             video.audio.write_audiofile(output_path, logger=None)
             video.close()
             
