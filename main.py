@@ -1,19 +1,17 @@
-
-
 import os
 import logging
 import asyncio
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from moviepy.video.io.VideoFileClip import VideoFileClip
-# Set up logging
+
+# Set up clean logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# REPLACE THESE WITH YOUR NEW BOT DETAILS
+# CREDENTIALS
 BOT_TOKEN = "8883987083:AAEC1HbhmaDX3tDJd-qMzU7hHpKlcbil8J4"
-RENDER_URL = "https://telegram-file-converter-0xwy.onrender.com"
-
+RENDER_URL = "https://telegram-file-converter-0xwy.onrender.com" 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -68,29 +66,22 @@ async def convert_video_to_mp3(update: Update, context: ContextTypes.DEFAULT_TYP
                 try: os.remove(path)
                 except Exception: pass
 
+# Official post-initialization cleanup hook
+async def clear_old_webhooks(application: Application) -> None:
+    logger.info("Automatically clearing any conflicting webhook pathways...")
+    await application.bot.delete_webhook(drop_pending_updates=True)
+    logger.info("Webhook cleaned cleanly!")
+
 def main():
-    # 1. Build the application layout
-    application = Application.builder().token(BOT_TOKEN).build()
+    # Pass the cleanup function into the application builder natively
+    application = Application.builder().token(BOT_TOKEN).post_init(clear_old_webhooks).build()
     
-    # 2. Register your command handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, convert_video_to_mp3))
     
-    # 3. Get the port assigned dynamically by Render
     port = int(os.environ.get("PORT", 8080))
-    
     logger.info("Starting converter webhook gateway...")
     
-    # 4. Force Telegram to delete any old broken webhooks automatically on startup
-    async def reset_webhook():
-        await application.bot.delete_webhook(drop_pending_updates=True)
-        logger.info("Old webhooks cleared successfully!")
-    
-    # Run the setup loop securely
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(reset_webhook())
-    
-    # 5. Let the python framework register and run the webhook itself!
     application.run_webhook(
         listen="0.0.0.0",
         port=port,
