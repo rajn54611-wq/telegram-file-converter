@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 # REPLACE THESE WITH YOUR NEW BOT DETAILS
 BOT_TOKEN = "8883987083:AAEC1HbhmaDX3tDJd-qMzU7hHpKlcbil8J4"
-RENDER_URL = "https://YOUR-NEW-CONVERTER-NAME.onrender.com" 
+RENDER_URL = "https://telegram-file-converter-0xwy.onrender.com"
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
